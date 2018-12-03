@@ -12,7 +12,6 @@ var expect = require('chai').expect;
 var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectId;
 const MONGODB_CONNECTION_STRING = process.env.DB;
-//Example connection: MongoClient.connect(MONGODB_CONNECTION_STRING, function(err, db) {});
 
 module.exports = function (app) {
 
@@ -20,6 +19,18 @@ module.exports = function (app) {
     .get(function (req, res){
       //response will be array of book objects
       //json res format: [{"_id": bookid, "title": book_title, "commentcount": num_of_comments },...]
+      MongoClient.connect(MONGODB_CONNECTION_STRING, function(err, db) {
+        if(err){
+          console.log(err);
+        } else {
+          console.log('Successfully connected to the database');
+          db.collection('books').find().toArray(function(err,doc){
+            const toRet=doc.map(function(ele){return {title: ele.title, _id: ele._id, commentcount: (ele.comments) ? ele.comments.length : 0}})
+            res.json(toRet);
+          });
+          
+        }
+      });
     })
     
     .post(function (req, res){
