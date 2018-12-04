@@ -82,6 +82,25 @@ module.exports = function (app) {
       var bookid = req.params.id;
       var comment = req.body.comment;
       //json res format same as .get
+    
+      if(!ObjectId.isValid(bookid)){
+        res.json('no book exists');
+        return;
+      }
+      MongoClient.connect(MONGODB_CONNECTION_STRING, function(err, db) {
+        if(err){
+          console.log(err);
+        } else {
+          console.log('Successfully connected to the database');
+          db.collection('books').findOneAndUpdate({_id: ObjectId(bookid)}, {$push: {comments: comment}}, {returnOriginal : false}, function(err,doc){
+            if(err){
+              console.log(err);
+            } else {
+              res.json((doc.value) ? doc.value : 'no book exists');
+            }
+          })
+        }
+      });
     })
     
     .delete(function(req, res){
