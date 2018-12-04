@@ -35,6 +35,10 @@ module.exports = function (app) {
     
     .post(function (req, res){
       var title = req.body.title;
+      if(!title){
+        res.json('no title provided');
+        return;
+      }
       //response will contain new book object including atleast _id and title
       MongoClient.connect(MONGODB_CONNECTION_STRING, function(err, db) {
         if(err){
@@ -76,6 +80,26 @@ module.exports = function (app) {
     .get(function (req, res){
       var bookid = req.params.id;
       //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
+    
+      if(!ObjectId.isValid(bookid)){
+        res.json('no book exists');
+        return;
+      }
+      MongoClient.connect(MONGODB_CONNECTION_STRING, function(err, db) {
+        if(err){
+          console.log(err);
+        } else {
+          console.log('Successfully connected to the database');
+          db.collection('books').findOne({_id: ObjectId(bookid)}, function(err,doc){
+            if(err){
+              console.log(err);
+            } else {
+              res.json((doc) ? doc : 'no book exists');
+            }
+          })
+        }
+      });
+    
     })
     
     .post(function(req, res){
@@ -83,6 +107,10 @@ module.exports = function (app) {
       var comment = req.body.comment;
       //json res format same as .get
     
+      if(!comment){
+        res.json('no comment provided');
+        return;
+      }
       if(!ObjectId.isValid(bookid)){
         res.json('no book exists');
         return;
