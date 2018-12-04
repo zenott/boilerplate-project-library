@@ -134,6 +134,25 @@ module.exports = function (app) {
     .delete(function(req, res){
       var bookid = req.params.id;
       //if successful response will be 'delete successful'
+    
+      if(!ObjectId.isValid(bookid)){
+        res.json('no book exists');
+        return;
+      }
+      MongoClient.connect(MONGODB_CONNECTION_STRING, function(err, db) {
+        if(err){
+          console.log(err);
+        } else {
+          console.log('Successfully connected to the database');
+          db.collection('books').deleteOne({_id: ObjectId(bookid)}, function(err,doc){
+            if(err){
+              console.log(err);
+            } else {
+              res.json((doc.deletedCount===1) ? 'delete successful' : 'no book exists');
+            }
+          })
+        }
+      });
     });
   
 };
