@@ -45,11 +45,11 @@ module.exports = function (app) {
           console.log(err);
         } else {
           console.log('Successfully connected to the database');
-          db.collection('books').insertOne({title: title}, function(err,doc){
+          db.collection('books').insertOne({title: title, comments: []}, function(err,doc){
             if(err){
               console.log(err);
             } else {
-              res.json({title:title, _id:doc.insertedId});
+              res.json({title: title, _id: doc.insertedId});
             }
           })
         }
